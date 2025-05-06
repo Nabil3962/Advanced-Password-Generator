@@ -1,116 +1,195 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Password Generator & Strength Checker</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 20px;
-        }
-        textarea {
-            width: 80%;
-            height: 200px;
-            margin-top: 10px;
-            resize: vertical;
-        }
-        #timer, #strength {
-            font-weight: bold;
-            margin-top: 10px;
-        }
-        #suggestedPassword {
-            font-weight: bold;
-            color: green;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Generator & Strength Checker</title>
+  <style>
+    :root {
+      --bg: #f4f4f4;
+      --text: #111;
+      --primary: #007bff;
+      --danger: #dc3545;
+      --success: #28a745;
+    }
+
+    body.dark-mode {
+      --bg: #121212;
+      --text: #f0f0f0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      text-align: center;
+    }
+
+    button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 14px;
+      cursor: pointer;
+      background: var(--primary);
+      border: none;
+      color: white;
+      border-radius: 5px;
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    textarea {
+      width: 90%;
+      height: 200px;
+      margin-top: 10px;
+      resize: vertical;
+      padding: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    #strength-bar {
+      width: 90%;
+      height: 10px;
+      background: #ddd;
+      margin: 10px auto;
+      border-radius: 5px;
+      overflow: hidden;
+    }
+
+    #strength-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    #suggestedPassword {
+      font-weight: bold;
+      color: var(--success);
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .toggle-theme {
+      background: #555;
+    }
+
+    @media (max-width: 600px) {
+      textarea, #strength-bar {
+        width: 100%;
+      }
+
+      button {
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
+  </style>
 </head>
 <body>
-    <h2>Password Generator & Strength Checker</h2>
-    <button onclick="generateCombinations()">Generate 4-Char Combinations</button>
-    <button onclick="generatePassword(12)">Suggest 12-Char Password</button>
-    <button onclick="generatePassword(16)">Suggest 16-Char Password</button>
-    <button onclick="generatePassword(20)">Suggest 20-Char Password</button>
-    <button onclick="clearTextarea()">Clear</button>
-    
-    <p id="timer">Time taken: 0s</p>
-    <textarea id="output" placeholder="Results will appear here..." oninput="checkStrength()"></textarea>
-    <p id="strength">Password Strength: -</p>
-    <p>Suggested Password: <span id="suggestedPassword" onclick="copyPassword()">Click to generate</span></p>
+  <h2>Password Generator & Strength Checker</h2>
+  <button onclick="generateCombinations()">Generate 4-Char Combinations</button>
+  <button onclick="generatePassword(12)">Suggest 12-Char Password</button>
+  <button onclick="generatePassword(16)">Suggest 16-Char Password</button>
+  <button onclick="generatePassword(20)">Suggest 20-Char Password</button>
+  <button onclick="clearTextarea()">Clear</button>
+  <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
 
-    <script>
-        function generateCombinations() {
-            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
-            let output = "";
-            const len = charset.length;
-            let limit = 1000; // Prevents browser lag
-            let count = 0;
+  <p id="timer">Time taken: 0s</p>
+  <textarea id="output" placeholder="Results will appear here..." oninput="checkStrength()"></textarea>
+  <p id="strength">Password Strength: -</p>
+  <div id="strength-bar"><div id="strength-fill"></div></div>
 
-            let startTime = performance.now(); // Start timer
+  <p>Suggested Password: <span id="suggestedPassword" onclick="copyPassword()">Click to generate</span></p>
 
-            for (let i = 0; i < len && count < limit; i++) {
-                for (let j = 0; j < len && count < limit; j++) {
-                    for (let k = 0; k < len && count < limit; k++) {
-                        for (let l = 0; l < len && count < limit; l++) {
-                            output += charset[i] + charset[j] + charset[k] + charset[l] + "\n";
-                            count++;
-                        }
-                    }
-                }
+  <script>
+    function generateCombinations() {
+      const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~";
+      let output = "";
+      const len = charset.length;
+      let limit = 1000;
+      let count = 0;
+      let startTime = performance.now();
+
+      for (let i = 0; i < len && count < limit; i++) {
+        for (let j = 0; j < len && count < limit; j++) {
+          for (let k = 0; k < len && count < limit; k++) {
+            for (let l = 0; l < len && count < limit; l++) {
+              output += charset[i] + charset[j] + charset[k] + charset[l] + "\n";
+              count++;
             }
-
-            let endTime = performance.now(); // End timer
-            let timeTaken = ((endTime - startTime) / 1000).toFixed(2); // Convert to seconds
-
-            document.getElementById("output").value = output;
-            document.getElementById("output").removeAttribute("readonly");
-            document.getElementById("timer").innerText = `Time taken: ${timeTaken}s`;
-            checkStrength(); // Update strength
+          }
         }
+      }
 
-        function generatePassword(length) {
-            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
-            let password = "";
-            for (let i = 0; i < length; i++) {
-                password += charset[Math.floor(Math.random() * charset.length)];
-            }
-            document.getElementById("suggestedPassword").innerText = password;
-            checkStrength(password);
-        }
+      let endTime = performance.now();
+      let timeTaken = ((endTime - startTime) / 1000).toFixed(2);
+      document.getElementById("output").value = output;
+      document.getElementById("timer").innerText = `Time taken: ${timeTaken}s`;
+      checkStrength();
+    }
 
-        function copyPassword() {
-            let password = document.getElementById("suggestedPassword").innerText;
-            navigator.clipboard.writeText(password);
-            alert("Password copied to clipboard!");
-        }
+    function generatePassword(length) {
+      const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
+      let password = "";
+      for (let i = 0; i < length; i++) {
+        password += charset[Math.floor(Math.random() * charset.length)];
+      }
+      document.getElementById("suggestedPassword").innerText = password;
+      checkStrength(password);
+    }
 
-        function clearTextarea() {
-            document.getElementById("output").value = "";
-            document.getElementById("strength").innerText = "Password Strength: -";
-        }
+    function copyPassword() {
+      let password = document.getElementById("suggestedPassword").innerText;
+      navigator.clipboard.writeText(password).then(() => {
+        alert("Password copied to clipboard!");
+      });
+    }
 
-        function checkStrength(password = "") {
-            let text = password || document.getElementById("output").value;
-            let strengthText = "Weak";
-            let hasLower = /[a-z]/.test(text);
-            let hasUpper = /[A-Z]/.test(text);
-            let hasDigit = /\d/.test(text);
-            let hasSymbol = /[!@#$%^&*()_+[\]{}|;:,.<>?]/.test(text);
-            let length = text.length;
+    function clearTextarea() {
+      document.getElementById("output").value = "";
+      document.getElementById("strength").innerText = "Password Strength: -";
+      updateStrengthBar(0);
+    }
 
-            let strengthScore = hasLower + hasUpper + hasDigit + hasSymbol;
+    function checkStrength(password = "") {
+      let text = password || document.getElementById("output").value.trim();
+      let strengthText = "Very Weak";
+      let score = 0;
 
-            if (length > 12 && strengthScore >= 3) {
-                strengthText = "Strong";
-            } else if (length > 8 && strengthScore >= 2) {
-                strengthText = "Medium";
-            }
+      if (/[a-z]/.test(text)) score++;
+      if (/[A-Z]/.test(text)) score++;
+      if (/\d/.test(text)) score++;
+      if (/[^A-Za-z0-9]/.test(text)) score++;
+      if (text.length >= 12) score++;
 
-            document.getElementById("strength").innerText = `Password Strength: ${strengthText}`;
-        }
-    </script>
+      const strengthMap = {
+        0: { label: "Very Weak", color: "red" },
+        1: { label: "Weak", color: "orangered" },
+        2: { label: "Medium", color: "orange" },
+        3: { label: "Good", color: "yellowgreen" },
+        4: { label: "Strong", color: "green" },
+        5: { label: "Very Strong", color: "darkgreen" }
+      };
+
+      let level = strengthMap[score];
+      document.getElementById("strength").innerText = `Password Strength: ${level.label}`;
+      updateStrengthBar((score / 5) * 100, level.color);
+    }
+
+    function updateStrengthBar(width, color = "red") {
+      const fill = document.getElementById("strength-fill");
+      fill.style.width = `${width}%`;
+      fill.style.background = color;
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+    }
+  </script>
 </body>
 </html>
