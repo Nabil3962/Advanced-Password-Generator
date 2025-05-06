@@ -10,9 +10,7 @@
       --primary: #00ff95;
       --danger: #ff4b5c;
       --success: #28a745;
-      --bg-light: #f4f4f4;
       --bg-dark: rgba(0, 0, 0, 0.85);
-      --text-light: #111;
       --text-dark: #f0f0f0;
     }
 
@@ -29,7 +27,23 @@
       justify-content: start;
       padding: 20px;
       background-blend-mode: overlay;
-      background-color: rgba(0, 0, 0, 0.8);
+      background-color: rgba(0, 0, 0, 0.85);
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      width: 350px;
+      height: 350px;
+      background: url('https://i.ibb.co/1X7rH5N/anonymous-mask.png') no-repeat center center;
+      background-size: contain;
+      opacity: 0.05;
+      transform: translate(-50%, -50%);
+      z-index: 0;
+      pointer-events: none;
     }
 
     h2 {
@@ -37,10 +51,18 @@
       margin-bottom: 20px;
       color: var(--primary);
       text-shadow: 0 0 10px #00ff95;
+      z-index: 1;
+    }
+
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      z-index: 1;
     }
 
     button {
-      margin: 5px;
       padding: 10px 15px;
       font-size: 14px;
       cursor: pointer;
@@ -72,6 +94,7 @@
       border: 1px solid #ccc;
       background-color: #1e1e1e;
       color: #00ff95;
+      z-index: 1;
     }
 
     #strength-bar {
@@ -82,6 +105,7 @@
       margin: 10px auto;
       border-radius: 5px;
       overflow: hidden;
+      z-index: 1;
     }
 
     #strength-fill {
@@ -95,14 +119,23 @@
       color: var(--success);
       cursor: pointer;
       text-decoration: underline;
+      z-index: 1;
+    }
+
+    .copy-icon {
+      margin-left: 8px;
+      cursor: pointer;
+      font-size: 1.2em;
+      user-select: none;
     }
 
     p, #timer, #strength {
       margin: 10px 0;
+      z-index: 1;
     }
 
     @media (max-width: 600px) {
-      textarea, #strength-bar, button {
+      textarea, #strength-bar, .button-group, button {
         width: 100%;
       }
     }
@@ -110,19 +143,25 @@
 </head>
 <body>
   <h2>👨‍💻 Password Generator & Strength Checker</h2>
-  <button onclick="generateCombinations()">Generate 4-Char Combos</button>
-  <button onclick="generatePassword(12)">Suggest 12-Char Password</button>
-  <button onclick="generatePassword(16)">Suggest 16-Char Password</button>
-  <button onclick="generatePassword(20)">Suggest 20-Char Password</button>
-  <button onclick="clearTextarea()">Clear</button>
-  <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+
+  <div class="button-group">
+    <button onclick="generateCombinations()">Generate 4-Char Combos</button>
+    <button onclick="generatePassword(12)">Suggest 12-Char Password</button>
+    <button onclick="generatePassword(16)">Suggest 16-Char Password</button>
+    <button onclick="generatePassword(20)">Suggest 20-Char Password</button>
+    <button onclick="clearTextarea()">Clear</button>
+    <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
+  </div>
 
   <p id="timer">Time taken: 0s</p>
   <textarea id="output" placeholder="Results will appear here..." oninput="checkStrength()"></textarea>
   <p id="strength">Password Strength: -</p>
   <div id="strength-bar"><div id="strength-fill"></div></div>
 
-  <p>Suggested Password: <span id="suggestedPassword" onclick="copyPassword()">Click to generate</span></p>
+  <p>Suggested Password:
+    <span id="suggestedPassword" onclick="copyPassword()">Click to generate</span>
+    <span id="copyIcon" class="copy-icon">📋</span>
+  </p>
 
   <script>
     function generateCombinations() {
@@ -158,13 +197,14 @@
         password += charset[Math.floor(Math.random() * charset.length)];
       }
       document.getElementById("suggestedPassword").innerText = password;
+      document.getElementById("copyIcon").innerText = "📋";
       checkStrength(password);
     }
 
     function copyPassword() {
       let password = document.getElementById("suggestedPassword").innerText;
       navigator.clipboard.writeText(password).then(() => {
-        alert("Password copied to clipboard!");
+        document.getElementById("copyIcon").innerText = "✅";
       });
     }
 
@@ -176,7 +216,6 @@
 
     function checkStrength(password = "") {
       let text = password || document.getElementById("output").value.trim();
-      let strengthText = "Very Weak";
       let score = 0;
 
       if (/[a-z]/.test(text)) score++;
