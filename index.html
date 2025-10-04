@@ -4,11 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Advanced Password Generator</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <h2>🔐 Advanced Password Generator</h2>
@@ -19,18 +15,17 @@
     <button onclick="generatePassword(20)">Generate 20-Char</button>
     <button onclick="generatePassphrase()">Generate Passphrase</button>
     <button onclick="customToHard()">Custom → Hard</button>
-    <button onclick="checkPwned(document.getElementById('output').value.trim())">Check Breaches</button>
     <button onclick="clearTextarea()">Clear</button>
-    <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
   </div>
 
   <p id="timer">Time taken: 0s</p>
-  
+
   <div class="password-container">
     <textarea id="output" placeholder="Your password will appear here..." oninput="checkStrength()"></textarea>
     <button class="toggle-visibility" onclick="toggleVisibility()">👁️</button>
   </div>
-  
+
   <p id="strength">Password Strength: -</p>
   <div id="strength-bar"><div id="strength-fill"></div></div>
 
@@ -39,14 +34,10 @@
     <span id="copyIcon" class="copy-icon">📋</span>
   </p>
 
-  <p class="info-text">
-    <strong>Tip:</strong> Use passphrases (multiple random words) for better security and memorability.
-  </p>
+  <p class="info-text"><strong>Tip:</strong> Use passphrases for better security.</p>
+  <footer>Created by Suhail Al Mehedi</footer>
 
-  <footer>
-    Created by Suhail Al Mehedi
-  </footer>
-
-  <script src="script.js"></script>
+  <script type="module" src="script.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
 </body>
 </html>
