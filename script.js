@@ -28,10 +28,10 @@ function generateFromInput(){
   let mutated="";
   for(let ch of base) mutated+=leetMap[ch]?Math.random()>0.5?leetMap[ch]:ch:ch;
   mutated=mutated.split("").map(ch=>Math.random()>0.3?ch.toUpperCase():ch).join("");
-  for(let i=0;i<4;i++){
-    const rand=charset[Math.floor(Math.random()*charset.length)];
+  for(let i=0;i<4;i++){ 
+    const r=charset[Math.floor(Math.random()*charset.length)];
     const pos=Math.floor(Math.random()*(mutated.length+1));
-    mutated=mutated.slice(0,pos)+rand+mutated.slice(pos);
+    mutated=mutated.slice(0,pos)+r+mutated.slice(pos);
   }
   mutated=mutated.split('').sort(()=>Math.random()-0.5).join('');
   document.getElementById("output").value=mutated;
@@ -44,7 +44,7 @@ function checkStrength(password=""){
   const text=password||document.getElementById("output").value.trim();
   if(!text){ document.getElementById("strength").innerText="Password Strength: -"; updateStrengthBar(0); return;}
   const res=zxcvbn(text);
-  const map=[{label:"Very Weak",color:"#ff4b5c"},{label:"Weak",color:"orange"},{label:"Medium",color:"yellow"},{label:"Strong",color:"yellowgreen"},{label:"Very Strong",color:"#00ff95"}];
+  const map=[{label:"Very Weak",color:"#ff4b5c"},{label:"Weak",color:"orange"},{label:"Medium",color:"yellow"},{label:"Strong",color:"yellowgreen"},{label:"Very Strong",color:"#00aaff"}];
   const lvl=map[res.score];
   document.getElementById("strength").innerHTML=`Password Strength: <strong>${lvl.label}</strong> <small>(can be cracked ${res.crack_times_display.online_no_throttling_10_per_second})</small>`;
   updateStrengthBar((res.score/4)*100,lvl.color);
