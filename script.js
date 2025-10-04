@@ -1,63 +1,28 @@
-// ------------------ Firebase Setup ------------------
-// TODO: Replace these with your Firebase config
+// ---------- Firebase Setup ----------
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "SENDER_ID",
-  appId: "APP_ID"
+  apiKey: "AIzaSyCJT9-254-jxY9i_plfGxu2XnMD_a7zW-Y",
+  authDomain: "advanced-password-generator.firebaseapp.com",
+  projectId: "advanced-password-generator",
+  storageBucket: "advanced-password-generator.appspot.com",
+  messagingSenderId: "126374204251",
+  appId: "1:126374204251:web:YOUR_APP_ID"
 };
-
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Anonymous login for multi-device sync
-auth.signInAnonymously().catch(console.error);
+// ---------- Leet Mapping & Charset ----------
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
+const leetMap = {a:"@",A:"@",e:"3",E:"3",i:"1",I:"1",o:"0",O:"0",s:"$",S:"$",t:"7",T:"7"};
 
-// ------------------ Password Logic ------------------
-const charset="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
-const leetMap={a:"@",A:"4",s:"$",S:"5",i:"1",I:"!",o:"0",O:"0",e:"3",E:"3",g:"9",G:"6",t:"7",T:"7"};
+// ---------- Authentication ----------
+auth.signInAnonymously().then(()=>loadHistory()).catch(err=>console.error(err));
 
-let userId=null;
-auth.onAuthStateChanged(user=>{
-  if(user){
-    userId=user.uid;
-    loadHistory();
-  }
-});
-
-function saveHistory(password){
-  if(!userId) return;
-  const docRef=db.collection("users").doc(userId);
-  docRef.set({
-    history: firebase.firestore.FieldValue.arrayUnion(password)
-  }, {merge:true});
-  loadHistory();
-}
-
-async function loadHistory(){
-  if(!userId) return;
-  const docRef = db.collection("users").doc(userId);
-  const doc = await docRef.get();
-  const listEl = document.getElementById("historyList");
-  listEl.innerHTML="";
-  if(doc.exists && doc.data().history){
-    doc.data().history.slice(-10).reverse().forEach(p=>{
-      const li=document.createElement("li");
-      li.textContent=p;
-      listEl.appendChild(li);
-    });
-  }
-}
-
-// ------------------ Existing Features ------------------
+// ---------- Generate Password ----------
 function generatePassword(len){
-  let pass="";
-  const start=performance.now();
+  let pass="", start=performance.now();
   for(let i=0;i<len;i++) pass+=charset[Math.floor(Math.random()*charset.length)];
-  const end=performance.now();
+  let end=performance.now();
   document.getElementById("output").value=pass;
   document.getElementById("suggestedPassword").innerText=pass;
   document.getElementById("timer").innerText=`Time taken: ${((end-start)/1000).toFixed(4)}s`;
@@ -65,6 +30,7 @@ function generatePassword(len){
   saveHistory(pass);
 }
 
+// ---------- Generate Passphrase ----------
 function generatePassphrase(){
   const wordList=["correct","horse","battery","staple","octopus","guitar","sunset","penguin","whisper","ladder","velvet","tornado","quasar","jigsaw","xylophone","bamboo","cascade","dolphin","eclipse","firefly"];
   let pass="";
@@ -75,63 +41,75 @@ function generatePassphrase(){
   saveHistory(pass);
 }
 
+// ---------- Custom Input → Hard Password ----------
 function generateFromInput(){
   const inp=document.getElementById("output").value.trim();
   if(!inp){alert("Type a password first!"); return;}
   let newPass="";
-  for(let c of inp){ newPass += leetMap[c] || c; newPass += charset[Math.floor(Math.random()*charset.length)];}
+  for(let c of inp){ newPass += leetMap[c]||c; newPass += charset[Math.floor(Math.random()*charset.length)];}
   document.getElementById("output").value=newPass;
   document.getElementById("suggestedPassword").innerText=newPass;
   checkStrength(newPass);
   saveHistory(newPass);
 }
 
-// ------------------ Strength & Breach ------------------
+// ---------- Password Strength ----------
 function checkStrength(p=""){
   const text=p||document.getElementById("output").value.trim();
   if(!text){document.getElementById("strength").innerText="Password Strength: -"; updateStrengthBar(0); return;}
   const res=zxcvbn(text);
-  const map=[{label:"Very Weak",color:"#ff4b5c"},{label:"Weak",color:"orange"},{label:"Medium",color:"yellow"},{label:"Strong",color:"yellowgreen"},{label:"Very Strong",color: "#00aaff"}];
+  const map=[{label:"Very Weak",color:"#ff4b5c"},{label:"Weak",color:"orange"},{label:"Medium",color:"yellow"},{label:"Strong",color:"yellowgreen"},{label:"Very Strong",color:"#00aaff"}];
   const lvl=map[res.score];
   document.getElementById("strength").innerHTML=`Password Strength: <strong>${lvl.label}</strong> <small>(can be cracked ${res.crack_times_display.online_no_throttling_10_per_second})</small>`;
   updateStrengthBar((res.score/4)*100,lvl.color);
 }
 
-function updateStrengthBar(w,color="var(--primary)"){document.getElementById("strength-fill").style.width=w+"%"; document.getElementById("strength-fill").style.background=color;}
+// ---------- Strength Bar ----------
+function updateStrengthBar(w,col="red"){ const fill=document.getElementById("strength-fill"); fill.style.width=`${w}%`; fill.style.background=col; }
 
-function toggleVisibility(){const o=document.getElementById("output"); o.type=o.type==="password"?"textarea":"password";}
+// ---------- Toggle Visibility ----------
+function toggleVisibility(){ const o=document.getElementById("output"); o.type=o.type==="password"?"textarea":"password"; }
 
-async function checkPwned(password){
-  if(!password){alert("Generate or type password first"); return;}
-  try{
-    const hash=await sha1(password);
-    const prefix=hash.substring(0,5);
-    const suffix=hash.substring(5).toUpperCase();
-    const res=await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
-    const data=await res.text();
-    const match=data.split('\n').find(l=>l.startsWith(suffix));
-    match?alert(`⚠️ Appeared in ${match.split(':')[1]} breaches!`):alert("✅ Not found in known breaches.");
-  }catch(e){console.error(e); alert("Error checking breaches.");}
-}
+// ---------- Copy ----------
+function copyPassword(){ const p=document.getElementById("suggestedPassword").innerText; if(!p||p==="Click to generate"){alert("Generate first"); return;} navigator.clipboard.writeText(p).then(()=>{document.getElementById("copyIcon").innerText="✅"; setTimeout(()=>{document.getElementById("copyIcon").innerText="📋"},2000);});}
 
-async function sha1(msg){const buf=new TextEncoder().encode(msg); const hash=await crypto.subtle.digest('SHA-1',buf); return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,'0')).join('');}
+// ---------- Clear ----------
+function clearTextarea(){document.getElementById("output").value="";document.getElementById("strength").innerText="Password Strength: -";document.getElementById("timer").innerText="Time taken: 0s";updateStrengthBar(0);}
 
-// ------------------ Copy & Clear ------------------
-function copyPassword(){const p=document.getElementById("suggestedPassword").innerText; if(!p||p==="Click to generate"){alert("Generate first"); return;} navigator.clipboard.writeText(p).then(()=>{document.getElementById("copyIcon").innerText="✅"; setTimeout(()=>{document.getElementById("copyIcon").innerText="📋";},2000);});}
-
-function clearTextarea(){document.getElementById("output").value=""; document.getElementById("strength").innerText="Password Strength: -"; document.getElementById("timer").innerText="Time taken: 0s"; updateStrengthBar(0);}
-
-// ------------------ Dark Mode ------------------
+// ---------- Dark Mode ----------
 function toggleDarkMode(){
-  const btn=document.querySelector('.toggle-theme');
   document.body.classList.toggle("dark-mode");
-  const isDark=document.body.classList.contains("dark-mode");
-  localStorage.setItem("darkMode",isDark);
-  btn.innerText=isDark?"☀️ Light Mode":"🌙 Dark Mode";
+  const btn=document.querySelector(".toggle-theme");
+  btn.innerText=document.body.classList.contains("dark-mode")?"🌞 Light Mode":"🌙 Dark Mode";
+  localStorage.setItem("darkMode",document.body.classList.contains("dark-mode"));
+}
+if(localStorage.getItem("darkMode")==="true"){document.body.classList.add("dark-mode");document.querySelector(".toggle-theme").innerText="🌞 Light Mode";}
+
+// ---------- Firestore Save & Load ----------
+function saveHistory(pass){
+  const user=auth.currentUser; if(!user) return;
+  db.collection("users").doc(user.uid).collection("history").doc().set({password:pass,timestamp:firebase.firestore.FieldValue.serverTimestamp()});
+}
+function loadHistory(){
+  auth.onAuthStateChanged(user=>{
+    if(!user) return;
+    db.collection("users").doc(user.uid).collection("history").orderBy("timestamp","desc").limit(10).onSnapshot(s=>{
+      const h=s.docs.map(d=>d.data().password);
+      console.log("Last passwords:",h);
+    });
+  });
 }
 
-const modeBtn=document.querySelector('.toggle-theme');
-if(localStorage.getItem("darkMode")==="true"){document.body.classList.add("dark-mode"); modeBtn.innerText="☀️ Light Mode";} 
-else{modeBtn.innerText="🌙 Dark Mode";}
+// ---------- Pwned Passwords ----------
+async function checkPwned(p){
+  if(!p){alert("Generate first"); return;}
+  try{
+    const h=await sha1(p); const prefix=h.substring(0,5); const suffix=h.substring(5).toUpperCase();
+    const res=await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
+    const txt=await res.text(); const m=txt.split('\n').find(line=>line.startsWith(suffix));
+    if(m){const count=m.split(':')[1]; alert(`⚠️ Warning: Found in ${count} breaches!`);}
+    else alert("✅ Not found in known breaches.");
+  } catch(e){console.error(e); alert("Error checking breaches");}
+}
 
-document.getElementById("output").type="textarea";
+async function sha1(msg){ const buf=new TextEncoder().encode(msg); const hash=await crypto.subtle.digest("SHA-1",buf); return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,"0")).join(""); }
