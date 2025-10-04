@@ -1,12 +1,12 @@
 :root {
-  --primary: #00aaff; /* neon green → blue */
+  --primary: #00aaff; 
   --danger: #ff4b5c;
   --bg-light: #f5f5f5;
   --card-light: #e0e0e0;
   --bg-dark: #000;
   --card-dark: #1e1e1e;
-  --text-light: #111; /* light mode black */
-  --text-dark: #fff;  /* dark mode white */
+  --text-light: #111;
+  --text-dark: #fff;
 }
 
 body {
@@ -20,66 +20,29 @@ body {
   min-height:100vh;
   transition:0.4s;
 }
-
 body.dark-mode {
   background-color: var(--bg-dark);
   color: var(--text-dark);
 }
 
 .container {width:90%; max-width:700px; display:flex; flex-direction:column; gap:12px;}
+h2 {text-align:center; font-size:2em; color:var(--primary); text-shadow:0 0 10px var(--primary); transition:0.3s;}
 
-h2 {
-  text-align:center; 
-  font-size:2em; 
-  color:var(--primary); 
-  text-shadow:0 0 10px var(--primary); 
-  transition:0.3s;
-}
-
-.card {
-  background: var(--card-light);
-  padding:10px;
-  border-radius:8px;
-  box-shadow:0 3px 10px rgba(0,0,0,0.1);
-  transition:0.3s;
-}
+.card {background: var(--card-light); padding:10px; border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,0.1); transition:0.3s;}
 .card:hover {box-shadow:0 5px 15px rgba(0,0,0,0.15); transform:translateY(-1px);}
 body.dark-mode .card {background:var(--card-dark); box-shadow:0 3px 10px rgba(0,170,255,0.1);}
 body.dark-mode .card:hover {box-shadow:0 5px 15px rgba(0,170,255,0.15);}
 
 .button-group {display:flex; flex-wrap:wrap; gap:8px; justify-content:center;}
-button {
-  padding:8px 12px;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-  font-family:'Share Tech Mono', monospace;
-  background:var(--primary);
-  color:#fff;
-  font-weight:bold;
-  font-size:13px;
-  transition:0.2s;
-}
+button {padding:8px 12px; border:none; border-radius:5px; cursor:pointer; font-family:'Share Tech Mono', monospace; background:var(--primary); color:#fff; font-weight:bold; font-size:13px; transition:0.2s;}
 button:hover {transform:scale(1.05); opacity:0.9;}
 .toggle-theme {background:#888; color:#fff;}
 
 .password-container {position:relative;}
-textarea {
-  width:100%;
-  height:80px;
-  padding:8px;
-  padding-right:36px;
-  resize: vertical;
-  border-radius:5px;
-  border:1px solid #ccc;
-  background:#fff;
-  color:var(--text-light);
-  transition:0.3s;
-  font-size:14px;
-}
+textarea {width:100%; height:80px; padding:8px; padding-right:40px; resize: vertical; border-radius:5px; border:1px solid #ccc; background:#fff; color:var(--text-light); font-size:14px; box-sizing:border-box; transition:0.3s;}
 textarea:focus {border-color:var(--primary); box-shadow:0 0 6px rgba(0,170,255,0.4);}
 body.dark-mode textarea {background:#2d2d2d; border-color:#444; color:var(--text-dark);}
-.toggle-visibility {position:absolute; top:6px; right:6px; font-size:1.2em; background:none; border:none; cursor:pointer; color:var(--primary);}
+.toggle-visibility {position:absolute; top:50%; right:10px; transform:translateY(-50%); font-size:1.2em; background:none; border:none; cursor:pointer; color:var(--primary);}
 
 #strength-bar {width:100%; height:8px; background:#ccc; border-radius:5px; overflow:hidden; margin-top:5px;}
 #strength-fill {height:100%; width:0%; transition:0.3s; border-radius:5px; background:var(--primary);}
@@ -88,6 +51,8 @@ body.dark-mode textarea {background:#2d2d2d; border-color:#444; color:var(--text
 .copy-icon {margin-left:6px; cursor:pointer; font-size:1.2em; color:var(--primary);}
 .info-text {font-size:0.88em; text-align:center; opacity:0.8;}
 .footer-text {text-align:center; font-size:0.82em; margin-top:8px; opacity:0.7;}
+
+.history-card ul {list-style:none; padding-left:10px; max-height:150px; overflow-y:auto;}
 
 @media(max-width:600px){
   .button-group, textarea, #strength-bar, button {width:100%;}
