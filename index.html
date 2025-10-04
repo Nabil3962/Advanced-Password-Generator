@@ -1,49 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Advanced Password Generator</title>
-  <link rel="stylesheet" href="/style.css">
-  <script type="module" src="/script.js" defer></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Password Generator</title>
+<link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <h2>🔐 Advanced Password Generator</h2>
+  <div class="container">
+    <h2>🔐 Advanced Password Generator</h2>
 
-  <div class="button-group">
-    <button onclick="generatePassword(12)">Generate 12-Char</button>
-    <button onclick="generatePassword(16)">Generate 16-Char</button>
-    <button onclick="generatePassword(20)">Generate 20-Char</button>
-    <button onclick="generatePassphrase()">Generate Passphrase</button>
-    <button onclick="customToHard()">Custom → Hard</button>
-    <button onclick="checkPwned(document.getElementById('output').value.trim())">Check Breaches</button>
-    <button onclick="clearTextarea()">Clear</button>
-    <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    <div class="button-group">
+      <button onclick="generatePassword(12)">Generate 12-Char</button>
+      <button onclick="generatePassword(16)">Generate 16-Char</button>
+      <button onclick="generatePassword(20)">Generate 20-Char</button>
+      <button onclick="generatePassphrase()">Generate Passphrase</button>
+      <button onclick="customToHard()">Custom → Hard</button>
+      <button onclick="clearTextarea()">Clear</button>
+      <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    </div>
+
+    <p id="timer">Time taken: 0s</p>
+    
+    <div class="password-container">
+      <textarea id="output" placeholder="Your password will appear here..." oninput="checkStrength()"></textarea>
+      <button class="toggle-visibility" onclick="toggleVisibility()">👁️</button>
+    </div>
+    
+    <p id="strength">Password Strength: -</p>
+    <div id="strength-bar"><div id="strength-fill"></div></div>
+
+    <p>Suggested Password:
+      <span id="suggestedPassword" onclick="copyPassword()">Click to generate</span>
+      <span id="copyIcon" class="copy-icon">📋</span>
+    </p>
+
+    <footer>Created by Suhail Al Mehedi</footer>
   </div>
 
-  <p id="timer">Time taken: 0s</p>
-
-  <div class="password-container">
-    <textarea id="output" placeholder="Your password will appear here..." oninput="checkStrength()"></textarea>
-    <button class="toggle-visibility" onclick="toggleVisibility()">👁️</button>
-  </div>
-
-  <p id="strength">Password Strength: -</p>
-  <div id="strength-bar"><div id="strength-fill"></div></div>
-
-  <p>Suggested Password:
-    <span id="suggestedPassword" onclick="copyPassword()">Click to generate</span>
-    <span id="copyIcon" class="copy-icon">📋</span>
-  </p>
-
-  <p class="info-text">
-    <strong>Tip:</strong> Use passphrases or custom passwords for better security and memorability.
-  </p>
-
-  <footer>
-    Created by Suhail Al Mehedi
-  </footer>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
+<script type="module" src="./main.js"></script>
 </body>
 </html>
