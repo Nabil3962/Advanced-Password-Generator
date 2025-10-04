@@ -5,7 +5,7 @@ const firebaseConfig = {
   projectId: "advanced-password-generator",
   storageBucket: "advanced-password-generator.appspot.com",
   messagingSenderId: "126374204251",
-  appId: "1:126374204251:web:YOUR_APP_ID"
+  appId: "1:126374204251:web:182b2b42ff9bd0fcef807e"
 };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
