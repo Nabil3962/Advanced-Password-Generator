@@ -1,29 +1,38 @@
-// ---------- Firebase Config ----------
-const firebaseConfig = {
-  apiKey: "AIzaSyCJT9-254-jxY9i_plfGxu2XnMD_a7zW-Y",
-  authDomain: "advanced-password-generator.firebaseapp.com",
-  projectId: "advanced-password-generator",
-  storageBucket: "advanced-password-generator.appspot.com",
-  messagingSenderId: "126374204251",
-  appId: "1:126374204251:web:182b2b42ff9bd0fcef807e",
-  measurementId: "G-TYGNXHMTZF"
-};
-firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
+import { initializeApp } from "firebase/app";
+import { getAuth, signInAnonymously } from "firebase/auth";
+import { getFirestore, collection, doc, setDoc, serverTimestamp, onSnapshot, query, orderBy, limit } from "firebase/firestore";
 
-// ---------- Anonymous Auth ----------
-auth.signInAnonymously().catch(e=>console.error(e));
+// Firebase Config from .env
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Leet mapping for custom → hard password
+const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
+const leetMap = { a:"@", A:"@", e:"3", E:"3", i:"1", I:"1", o:"0", O:"0", s:"$", S:"$", t:"7", T:"7" };
+
+// Anonymous auth for multi-device sync
+signInAnonymously(auth).then(loadHistory).catch(console.error);
 
 // ---------- Password Generation ----------
 function generatePassword(len){
-  const charset="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
-  let pass=""; const start=performance.now();
+  let pass="", start=performance.now();
   for(let i=0;i<len;i++) pass+=charset[Math.floor(Math.random()*charset.length)];
   const end=performance.now();
-  document.getElementById("timer").innerText=`Time taken: ${((end-start)/1000).toFixed(4)}s`;
   document.getElementById("output").value=pass;
   document.getElementById("suggestedPassword").innerText=pass;
+  document.getElementById("timer").innerText=`Time taken: ${((end-start)/1000).toFixed(4)}s`;
   document.getElementById("copyIcon").innerText="📋";
   checkStrength(pass);
   saveHistory(pass);
@@ -31,7 +40,8 @@ function generatePassword(len){
 
 function generatePassphrase(){
   const words=["correct","horse","battery","staple","octopus","guitar","sunset","penguin","whisper","ladder","velvet","tornado","quasar","jigsaw","xylophone","bamboo","cascade","dolphin","eclipse","firefly"];
-  let pass=""; for(let i=0;i<4;i++){ pass+=words[Math.floor(Math.random()*words.length)]; if(i<3) pass+="-"; }
+  let pass="";
+  for(let i=0;i<4;i++){ pass+=words[Math.floor(Math.random()*words.length)]; if(i<3) pass+="-"; }
   document.getElementById("output").value=pass;
   document.getElementById("suggestedPassword").innerText=pass;
   document.getElementById("copyIcon").innerText="📋";
@@ -39,7 +49,6 @@ function generatePassphrase(){
   saveHistory(pass);
 }
 
-// ---------- Custom → Hard ----------
 function customToHard(){
   let base=document.getElementById("output").value.trim();
   if(!base){ alert("Enter your custom password first"); return; }
@@ -55,53 +64,53 @@ function customToHard(){
   saveHistory(hard);
 }
 
-// ---------- Strength ----------
 function checkStrength(pass=""){
   const txt=pass||document.getElementById("output").value.trim();
   if(!txt){ document.getElementById("strength").innerText="Password Strength: -"; updateStrengthBar(0); return;}
   const res=zxcvbn(txt);
   const map=[{label:"Very Weak",color:"#ff4b5c"},{label:"Weak",color:"orange"},{label:"Medium",color:"yellow"},{label:"Strong",color:"yellowgreen"},{label:"Very Strong",color:"#00aaff"}];
   const lvl=map[res.score];
-  document.getElementById("strength").innerHTML=`Password Strength: <strong>${lvl.label}</strong> <small>(can be cracked ${res.crack_times_display.online_no_throttling_10_per_second})</small>`;
-  updateStrengthBar((res.score/4)*100,lvl.color);
+  document.getElementById("strength").innerHTML=`Password Strength: <strong>${lvl.label}</strong>`;
+  updateStrengthBar((res.score+1)*20,lvl.color);
 }
 
-// ---------- Strength Bar ----------
-function updateStrengthBar(w,col="red"){ const fill=document.getElementById("strength-fill"); fill.style.width=`${w}%`; fill.style.background=col; }
+function updateStrengthBar(perc=0,color="#00aaff"){
+  const bar=document.getElementById("strength-fill");
+  bar.style.width=`${perc}%`;
+  bar.style.background=color;
+}
 
-// ---------- Toggle Visibility ----------
-function toggleVisibility(){ const o=document.getElementById("output"); o.type=o.type==="password"?"textarea":"password"; }
+// ---------- Firebase History ----------
+function saveHistory(pass){
+  const user = auth.currentUser; if(!user) return;
+  const ref = doc(collection(db,"users",user.uid,"history"));
+  setDoc(ref,{password:pass,timestamp:serverTimestamp()});
+}
 
-// ---------- Copy ----------
-function copyPassword(){ const p=document.getElementById("suggestedPassword").innerText; if(!p||p==="Click to generate"){alert("Generate first"); return;} navigator.clipboard.writeText(p).then(()=>{document.getElementById("copyIcon").innerText="✅"; setTimeout(()=>{document.getElementById("copyIcon").innerText="📋"},2000);});}
+function loadHistory(){
+  auth.onAuthStateChanged(user=>{
+    if(!user) return;
+    const q = query(collection(db,"users",user.uid,"history"),orderBy("timestamp","desc"),limit(10));
+    onSnapshot(q,snap=>{
+      const h = snap.docs.map(d=>d.data().password);
+      console.log("Last passwords:",h);
+    });
+  });
+}
 
-// ---------- Clear ----------
-function clearTextarea(){document.getElementById("output").value="";document.getElementById("strength").innerText="Password Strength: -";document.getElementById("timer").innerText="Time taken: 0s";updateStrengthBar(0);}
-
-// ---------- Dark Mode ----------
+// ---------- Utilities ----------
 function toggleDarkMode(){
   document.body.classList.toggle("dark-mode");
   const btn=document.querySelector(".toggle-theme");
   btn.innerText=document.body.classList.contains("dark-mode")?"🌞 Light Mode":"🌙 Dark Mode";
   localStorage.setItem("darkMode",document.body.classList.contains("dark-mode"));
 }
-if(localStorage.getItem("darkMode")==="true"){document.body.classList.add("dark-mode");document.querySelector(".toggle-theme").innerText="🌞 Light Mode";}
 
-// ---------- Firestore Save ----------
-function saveHistory(pass){
-  const user=auth.currentUser; if(!user) return;
-  db.collection("users").doc(user.uid).collection("history").doc().set({password:pass,timestamp:firebase.firestore.FieldValue.serverTimestamp()});
-}
+if(localStorage.getItem("darkMode")==="true") toggleDarkMode();
 
-// ---------- Pwned ----------
-async function checkPwned(p){
-  if(!p){alert("Generate first"); return;}
-  try{
-    const h=await sha1(p); const prefix=h.substring(0,5); const suffix=h.substring(5).toUpperCase();
-    const res=await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
-    const txt=await res.text(); const m=txt.split('\n').find(line=>line.startsWith(suffix));
-    if(m){const count=m.split(':')[1]; alert(`⚠️ Found in ${count} breaches!`);}
-    else alert("✅ Not found in known breaches.");
-  } catch(e){console.error(e); alert("Error checking breaches");}
+function clearTextarea(){ document.getElementById("output").value=""; checkStrength(); }
+function copyPassword(){ navigator.clipboard.writeText(document.getElementById("output").value); document.getElementById("copyIcon").innerText="✅"; }
+function toggleVisibility(){
+  const t=document.getElementById("output");
+  t.type=t.type==="password"?"text":"password";
 }
-async function sha1(msg){ const buf=new TextEncoder().encode(msg); const hash=await crypto.subtle.digest("SHA-1",buf); return Array.from(new Uint8Array(hash)).map(b=>b.toString(16).padStart(2,"0")).join(""); }
