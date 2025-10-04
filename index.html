@@ -1,387 +1,159 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
   <title>Password Generator & Strength Checker</title>
-  <meta name="description" content="Secure password generator with strength checking and breach detection">
-  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <style>
-    :root {
-      --primary: #00ff95;
-      --danger: #ff4b5c;
-      --warning: #ffa500;
-      --success: #28a745;
-      --bg-dark: rgba(0, 0, 0, 0.85);
-      --text-dark: #f0f0f0;
-    }
-
     body {
-      margin: 0;
-      font-family: 'Share Tech Mono', monospace;
-      background: url('https://i.ibb.co/6ZyX6CM/hacker-bg.jpg') no-repeat center center fixed;
-      background-size: cover;
-      color: var(--text-dark);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: start;
-      padding: 20px;
-      background-blend-mode: overlay;
-      background-color: var(--bg-dark);
-      position: relative;
-      transition: background-color 0.3s ease;
-    }
-
-    body.dark-mode {
-      background-color: #121212;
-      color: #e0e0e0;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      width: 350px;
-      height: 350px;
-      background: url('https://i.ibb.co/1X7rH5N/anonymous-mask.png') no-repeat center center;
-      background-size: contain;
-      opacity: 0.05;
-      transform: translate(-50%, -50%);
-      z-index: 0;
-      pointer-events: none;
-    }
-
-    h2 {
-      font-size: 2em;
-      margin-bottom: 20px;
-      color: var(--primary);
-      text-shadow: 0 0 10px #00ff95;
-      z-index: 1;
+      background: #0f0f0f;
+      color: #00ffcc;
+      font-family: "Courier New", monospace;
       text-align: center;
+      padding: 40px;
     }
-
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      z-index: 1;
-      margin-bottom: 15px;
+    h1 {
+      color: #00ffaa;
+      text-shadow: 0 0 10px #00ffaa;
     }
-
+    #password {
+      font-size: 20px;
+      margin: 15px 0;
+      padding: 10px;
+      border: 2px solid #00ffaa;
+      border-radius: 8px;
+      background: #1a1a1a;
+      color: #00ffcc;
+      width: 80%;
+      word-wrap: break-word;
+    }
     button {
+      margin: 5px;
       padding: 10px 15px;
       font-size: 14px;
-      cursor: pointer;
-      background: var(--primary);
       border: none;
-      color: #000;
-      border-radius: 5px;
-      transition: all 0.2s ease;
-      font-family: 'Share Tech Mono', monospace;
+      border-radius: 6px;
+      background: #00ffaa;
+      color: #0f0f0f;
+      cursor: pointer;
+      transition: 0.2s;
     }
-
     button:hover {
-      transform: scale(1.05);
-      opacity: 0.9;
+      background: #00ffcc;
     }
-
-    .toggle-theme {
-      background: #444;
-      color: white;
-    }
-
-    .password-container {
-      position: relative;
-      width: 90%;
-      max-width: 600px;
-      margin: 10px auto;
-    }
-
-    textarea {
-      width: 100%;
-      height: 200px;
-      margin-top: 10px;
-      resize: vertical;
-      padding: 10px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      background-color: #1e1e1e;
-      color: #00ff95;
-      z-index: 1;
-      font-family: 'Share Tech Mono', monospace;
-      padding-right: 40px;
-    }
-
-    body.dark-mode textarea {
-      background-color: #2d2d2d;
-      border-color: #444;
-    }
-
-    .toggle-visibility {
-      position: absolute;
-      right: 15px;
-      top: 15px;
-      background: none;
-      border: none;
-      color: var(--primary);
-      cursor: pointer;
-      z-index: 2;
-      font-size: 1.2em;
-    }
-
-    #strength-bar {
-      width: 90%;
-      max-width: 600px;
-      height: 10px;
-      background: #444;
-      margin: 10px auto;
-      border-radius: 5px;
-      overflow: hidden;
-      z-index: 1;
-    }
-
-    #strength-fill {
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s ease, background-color 0.3s ease;
-    }
-
-    #suggestedPassword {
+    #strength {
+      margin-top: 15px;
       font-weight: bold;
-      cursor: pointer;
-      text-decoration: underline;
-      z-index: 1;
-    }
-
-    .copy-icon {
-      margin-left: 8px;
-      cursor: pointer;
-      font-size: 1.2em;
-      user-select: none;
-    }
-
-    p, #timer, #strength {
-      margin: 10px 0;
-      z-index: 1;
-      max-width: 600px;
-      width: 90%;
-    }
-
-    small {
-      font-size: 0.8em;
-      opacity: 0.8;
-    }
-
-    .info-text {
-      font-size: 0.9em;
-      margin-top: 20px;
-      text-align: center;
-      max-width: 600px;
-      opacity: 0.8;
-    }
-
-    @media (max-width: 600px) {
-      textarea, #strength-bar, .button-group, button {
-        width: 100%;
-      }
-      
-      .button-group {
-        flex-direction: column;
-      }
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-  <h2>🔐 Advanced Password Generator</h2>
+  <h1>🔐 Password Generator</h1>
+  <div id="password">Click a button to generate a password</div>
 
-  <div class="button-group">
-    <button onclick="generatePassword(12)">Generate 12-Char</button>
-    <button onclick="generatePassword(16)">Generate 16-Char</button>
-    <button onclick="generatePassword(20)">Generate 20-Char</button>
-    <button onclick="generatePassphrase()">Generate Passphrase</button>
-    <button onclick="checkPwned(document.getElementById('output').value.trim())">Check Breaches</button>
-    <button onclick="clearTextarea()">Clear</button>
-    <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
-  </div>
+  <button onclick="generatePassword()">Generate Random</button>
+  <button onclick="generateCustomSimple()">Custom (Simple Shuffle)</button>
+  <button onclick="generateCustomAI()">Custom (AI Mutation)</button>
+  <button onclick="copyPassword()">Copy</button>
 
-  <p id="timer">Time taken: 0s</p>
-  
-  <div class="password-container">
-    <textarea id="output" placeholder="Your password will appear here..." oninput="checkStrength()"></textarea>
-    <button class="toggle-visibility" onclick="toggleVisibility()">👁️</button>
-  </div>
-  
-  <p id="strength">Password Strength: -</p>
-  <div id="strength-bar"><div id="strength-fill"></div></div>
+  <div id="strength">Strength: -</div>
 
-  <p>Suggested Password:
-    <span id="suggestedPassword" onclick="copyPassword()">Click to generate</span>
-    <span id="copyIcon" class="copy-icon">📋</span>
-  </p>
-
-  <p class="info-text">
-    <strong>Tip:</strong> Use passphrases (multiple random words) for better security and memorability.
-  </p>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
   <script>
-    // Password generation
-    function generatePassword(length) {
-      const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
+    // Charset for random generator
+    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
+    
+    // Leet substitutions
+    const leetMap = {
+      "a": "@", "A": "4",
+      "s": "$", "S": "5",
+      "i": "1", "I": "!",
+      "o": "0", "O": "0",
+      "e": "3", "E": "3",
+      "g": "9", "G": "6",
+      "t": "7", "T": "7"
+    };
+
+    // Update displayed password
+    function setPassword(pass) {
+      document.getElementById("password").textContent = pass;
+      checkStrength(pass);
+    }
+
+    // Random generator
+    function generatePassword() {
+      let length = 12;
       let password = "";
-      const startTime = performance.now();
-      
       for (let i = 0; i < length; i++) {
         password += charset[Math.floor(Math.random() * charset.length)];
       }
-      
-      const endTime = performance.now();
-      document.getElementById("timer").innerText = `Time taken: ${((endTime - startTime) / 1000).toFixed(4)}s`;
-      document.getElementById("output").value = password;
-      document.getElementById("suggestedPassword").innerText = password;
-      document.getElementById("copyIcon").innerText = "📋";
-      checkStrength(password);
+      setPassword(password);
     }
 
-    // Passphrase generation
-    function generatePassphrase() {
-      const wordList = [
-        "correct", "horse", "battery", "staple", "octopus", 
-        "guitar", "sunset", "penguin", "whisper", "ladder",
-        "velvet", "tornado", "quasar", "jigsaw", "xylophone",
-        "bamboo", "cascade", "dolphin", "eclipse", "firefly"
-      ];
-      
-      let passphrase = "";
-      for (let i = 0; i < 4; i++) {
-        passphrase += wordList[Math.floor(Math.random() * wordList.length)];
-        if (i < 3) passphrase += "-";
-      }
-      
-      document.getElementById("output").value = passphrase;
-      document.getElementById("suggestedPassword").innerText = passphrase;
-      document.getElementById("copyIcon").innerText = "📋";
-      checkStrength(passphrase);
+    // Custom simple shuffle
+    function generateCustomSimple() {
+      const base = prompt("Enter your base password/word:");
+      if (!base) return;
+      const shuffled = base.split('').sort(() => Math.random() - 0.5).join('');
+      setPassword(shuffled);
     }
 
-    // Password strength checking
-    function checkStrength(password = "") {
-      const text = password || document.getElementById("output").value.trim();
-      if (!text) {
-        document.getElementById("strength").innerText = "Password Strength: -";
-        updateStrengthBar(0);
-        return;
-      }
+    // Custom AI mutation
+    function generateCustomAI() {
+      const base = prompt("Enter your base password/word:");
+      if (!base) return;
 
-      const result = zxcvbn(text);
-      const strengthMap = [
-        { label: "Very Weak", color: "#ff4b5c" },
-        { label: "Weak", color: "orange" },
-        { label: "Medium", color: "yellow" },
-        { label: "Strong", color: "yellowgreen" },
-        { label: "Very Strong", color: "#00ff95" }
-      ];
+      let mutated = "";
 
-      const level = strengthMap[result.score];
-      document.getElementById("strength").innerHTML = 
-        `Password Strength: <strong>${level.label}</strong> <small>(can be cracked ${result.crack_times_display.online_no_throttling_10_per_second})</small>`;
-      updateStrengthBar((result.score / 4) * 100, level.color);
-    }
-
-    // Update strength bar
-    function updateStrengthBar(width, color = "red") {
-      const fill = document.getElementById("strength-fill");
-      fill.style.width = `${width}%`;
-      fill.style.background = color;
-    }
-
-    // Toggle password visibility
-    function toggleVisibility() {
-      const output = document.getElementById("output");
-      if (output.type === "password") {
-        output.type = "textarea";
-      } else {
-        output.type = "password";
-      }
-    }
-
-    // Check password against breaches
-    async function checkPwned(password) {
-      if (!password) {
-        alert("Please generate or enter a password first");
-        return;
-      }
-
-      try {
-        const hash = await sha1(password);
-        const prefix = hash.substring(0, 5);
-        const suffix = hash.substring(5).toUpperCase();
-        
-        const response = await fetch(`https://api.pwnedpasswords.com/range/${prefix}`);
-        const data = await response.text();
-        const matches = data.split('\n').find(line => line.startsWith(suffix));
-        
-        if (matches) {
-          const count = matches.split(':')[1];
-          alert(`⚠️ Warning: This password has appeared in ${count} data breaches!`);
+      // Step 1: Leet replacements
+      for (let ch of base) {
+        if (leetMap[ch]) {
+          mutated += Math.random() > 0.5 ? leetMap[ch] : ch;
         } else {
-          alert("✅ Good news! This password hasn't been found in any known breaches.");
+          mutated += ch;
         }
-      } catch (error) {
-        console.error("Error checking password:", error);
-        alert("Error checking breaches. Please try again later.");
       }
+
+      // Step 2: Random uppercase transformations
+      mutated = mutated.split("").map(ch =>
+        Math.random() > 0.3 ? ch.toUpperCase() : ch
+      ).join("");
+
+      // Step 3: Insert random chars
+      for (let i = 0; i < 4; i++) {
+        const randChar = charset[Math.floor(Math.random() * charset.length)];
+        const pos = Math.floor(Math.random() * (mutated.length + 1));
+        mutated = mutated.slice(0, pos) + randChar + mutated.slice(pos);
+      }
+
+      // Step 4: Shuffle
+      mutated = mutated.split('').sort(() => Math.random() - 0.5).join('');
+
+      setPassword(mutated);
     }
 
-    // SHA-1 hashing for breach check
-    async function sha1(message) {
-      const msgBuffer = new TextEncoder().encode(message);
-      const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
-    // Copy password to clipboard
+    // Copy password
     function copyPassword() {
-      const password = document.getElementById("suggestedPassword").innerText;
-      if (!password || password === "Click to generate") {
-        alert("Please generate a password first");
-        return;
-      }
-      
-      navigator.clipboard.writeText(password).then(() => {
-        document.getElementById("copyIcon").innerText = "✅";
-        setTimeout(() => {
-          document.getElementById("copyIcon").innerText = "📋";
-        }, 2000);
-      });
+      const pass = document.getElementById("password").textContent;
+      navigator.clipboard.writeText(pass);
+      alert("Password copied to clipboard!");
     }
 
-    // Clear textarea
-    function clearTextarea() {
-      document.getElementById("output").value = "";
-      document.getElementById("strength").innerText = "Password Strength: -";
-      document.getElementById("timer").innerText = "Time taken: 0s";
-      updateStrengthBar(0);
-    }
+    // Strength checker
+    function checkStrength(password) {
+      let strength = 0;
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^A-Za-z0-9]/.test(password)) strength++;
+      if (password.length >= 14) strength++;
 
-    // Toggle dark mode
-    function toggleDarkMode() {
-      document.body.classList.toggle("dark-mode");
-      localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
-    }
+      let label = "Weak";
+      if (strength >= 2) label = "Medium";
+      if (strength >= 3) label = "Strong";
+      if (strength >= 4) label = "Very Strong";
 
-    // Initialize dark mode from localStorage
-    if (localStorage.getItem("darkMode") === "true") {
-      document.body.classList.add("dark-mode");
+      document.getElementById("strength").textContent = "Strength: " + label;
     }
-
-    // Set textarea type initially
-    document.getElementById("output").type = "textarea";
   </script>
 </body>
 </html>
