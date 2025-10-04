@@ -1,26 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Password Generator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Password Generator & Strength Checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h1>🔐 Hacker Password Generator</h1>
-    <div class="password-box">
-      <input type="text" id="password" readonly>
-      <button onclick="copyPassword()">Copy</button>
-    </div>
-    <div class="buttons">
-      <button onclick="generatePassword()">Random Password</button>
-      <button onclick="generateCustomSimple()">Custom (Simple Shuffle)</button>
-      <button onclick="generateCustomAI()">Custom (AI Mutation)</button>
-    </div>
-    <div class="strength" id="strength">Strength: </div>
+  <h2>🔐 Advanced Password Generator</h2>
+
+  <div class="button-group">
+    <button onclick="generatePassword(12)">Generate 12-Char</button>
+    <button onclick="generatePassword(16)">Generate 16-Char</button>
+    <button onclick="generatePassword(20)">Generate 20-Char</button>
+    <button onclick="generatePassphrase()">Generate Passphrase</button>
+    <button onclick="checkPwned(document.getElementById('output').value.trim())">Check Breaches</button>
+    <button onclick="clearTextarea()">Clear</button>
+    <button onclick="generateFromInput()">Custom Input → Hard Password</button>
+    <button class="toggle-theme" onclick="toggleDarkMode()">🌙 Toggle Dark Mode</button>
   </div>
 
+  <p id="timer">Time taken: 0s</p>
+  
+  <div class="password-container">
+    <textarea id="output" placeholder="Your password will appear here..." oninput="checkStrength()"></textarea>
+    <button class="toggle-visibility" onclick="toggleVisibility()">👁️</button>
+  </div>
+  
+  <p id="strength">Password Strength: -</p>
+  <div id="strength-bar"><div id="strength-fill"></div></div>
+
+  <p>Suggested Password:
+    <span id="suggestedPassword" onclick="copyPassword()">Click to generate</span>
+    <span id="copyIcon" class="copy-icon">📋</span>
+  </p>
+
+  <p class="info-text">
+    <strong>Tip:</strong> Use passphrases (multiple random words) for better security and memorability.
+  </p>
+
+  <p class="footer-text">Created by Suhail Al Mehedi</p>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/zxcvbn/4.4.2/zxcvbn.js"></script>
   <script src="script.js"></script>
 </body>
 </html>
