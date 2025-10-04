@@ -2,158 +2,25 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Password Generator & Strength Checker</title>
-  <style>
-    body {
-      background: #0f0f0f;
-      color: #00ffcc;
-      font-family: "Courier New", monospace;
-      text-align: center;
-      padding: 40px;
-    }
-    h1 {
-      color: #00ffaa;
-      text-shadow: 0 0 10px #00ffaa;
-    }
-    #password {
-      font-size: 20px;
-      margin: 15px 0;
-      padding: 10px;
-      border: 2px solid #00ffaa;
-      border-radius: 8px;
-      background: #1a1a1a;
-      color: #00ffcc;
-      width: 80%;
-      word-wrap: break-word;
-    }
-    button {
-      margin: 5px;
-      padding: 10px 15px;
-      font-size: 14px;
-      border: none;
-      border-radius: 6px;
-      background: #00ffaa;
-      color: #0f0f0f;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    button:hover {
-      background: #00ffcc;
-    }
-    #strength {
-      margin-top: 15px;
-      font-weight: bold;
-      font-size: 18px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Password Generator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>🔐 Password Generator</h1>
-  <div id="password">Click a button to generate a password</div>
+  <div class="container">
+    <h1>🔐 Hacker Password Generator</h1>
+    <div class="password-box">
+      <input type="text" id="password" readonly>
+      <button onclick="copyPassword()">Copy</button>
+    </div>
+    <div class="buttons">
+      <button onclick="generatePassword()">Random Password</button>
+      <button onclick="generateCustomSimple()">Custom (Simple Shuffle)</button>
+      <button onclick="generateCustomAI()">Custom (AI Mutation)</button>
+    </div>
+    <div class="strength" id="strength">Strength: </div>
+  </div>
 
-  <button onclick="generatePassword()">Generate Random</button>
-  <button onclick="generateCustomSimple()">Custom (Simple Shuffle)</button>
-  <button onclick="generateCustomAI()">Custom (AI Mutation)</button>
-  <button onclick="copyPassword()">Copy</button>
-
-  <div id="strength">Strength: -</div>
-
-  <script>
-    // Charset for random generator
-    const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+[]{}|;:,.<>?";
-    
-    // Leet substitutions
-    const leetMap = {
-      "a": "@", "A": "4",
-      "s": "$", "S": "5",
-      "i": "1", "I": "!",
-      "o": "0", "O": "0",
-      "e": "3", "E": "3",
-      "g": "9", "G": "6",
-      "t": "7", "T": "7"
-    };
-
-    // Update displayed password
-    function setPassword(pass) {
-      document.getElementById("password").textContent = pass;
-      checkStrength(pass);
-    }
-
-    // Random generator
-    function generatePassword() {
-      let length = 12;
-      let password = "";
-      for (let i = 0; i < length; i++) {
-        password += charset[Math.floor(Math.random() * charset.length)];
-      }
-      setPassword(password);
-    }
-
-    // Custom simple shuffle
-    function generateCustomSimple() {
-      const base = prompt("Enter your base password/word:");
-      if (!base) return;
-      const shuffled = base.split('').sort(() => Math.random() - 0.5).join('');
-      setPassword(shuffled);
-    }
-
-    // Custom AI mutation
-    function generateCustomAI() {
-      const base = prompt("Enter your base password/word:");
-      if (!base) return;
-
-      let mutated = "";
-
-      // Step 1: Leet replacements
-      for (let ch of base) {
-        if (leetMap[ch]) {
-          mutated += Math.random() > 0.5 ? leetMap[ch] : ch;
-        } else {
-          mutated += ch;
-        }
-      }
-
-      // Step 2: Random uppercase transformations
-      mutated = mutated.split("").map(ch =>
-        Math.random() > 0.3 ? ch.toUpperCase() : ch
-      ).join("");
-
-      // Step 3: Insert random chars
-      for (let i = 0; i < 4; i++) {
-        const randChar = charset[Math.floor(Math.random() * charset.length)];
-        const pos = Math.floor(Math.random() * (mutated.length + 1));
-        mutated = mutated.slice(0, pos) + randChar + mutated.slice(pos);
-      }
-
-      // Step 4: Shuffle
-      mutated = mutated.split('').sort(() => Math.random() - 0.5).join('');
-
-      setPassword(mutated);
-    }
-
-    // Copy password
-    function copyPassword() {
-      const pass = document.getElementById("password").textContent;
-      navigator.clipboard.writeText(pass);
-      alert("Password copied to clipboard!");
-    }
-
-    // Strength checker
-    function checkStrength(password) {
-      let strength = 0;
-      if (password.length >= 8) strength++;
-      if (/[A-Z]/.test(password)) strength++;
-      if (/[0-9]/.test(password)) strength++;
-      if (/[^A-Za-z0-9]/.test(password)) strength++;
-      if (password.length >= 14) strength++;
-
-      let label = "Weak";
-      if (strength >= 2) label = "Medium";
-      if (strength >= 3) label = "Strong";
-      if (strength >= 4) label = "Very Strong";
-
-      document.getElementById("strength").textContent = "Strength: " + label;
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
